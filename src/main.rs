@@ -1,8 +1,11 @@
 use std::io;
+use std::fs;
 use std::fs::File;
 use std::io::{prelude::*, BufReader};
+use lopdf::Document;
 
 static FILENAME: &str = "testFile.txt";
+static OUTPUTDIR: &str = "output";
 
 fn main() {
     loop {
@@ -44,6 +47,10 @@ fn main() {
         for value in &dipendenti {
             println!("{}", value);
         }
+
+        fs::create_dir_all(OUTPUTDIR).unwrap();
+
+        load_pdf();
     }
 }
 
@@ -73,5 +80,29 @@ fn read_file(dip: &mut Vec<String>) {
             }
             Err(_) => println!("Errore linea")
         }
+    }
+}
+
+fn load_pdf() {
+    let doc = Document::load("UUU.pdf").unwrap();
+    let count = doc.get_pages().len().try_into().unwrap();
+    println!("Il PDF contiene {} buste paga", count);
+    for n in 1..=count {
+        let mut doc_copy = doc.clone();
+        let mut name = String::from("page");
+        name.push_str(&n.to_string());
+        name.push_str(".pdf");
+
+        let mut del_pages: Vec<u32> = Vec::new();
+        for x in 1..=count {
+            if x == n {
+                continue;
+            }
+            del_pages.push(x);
+        }
+        doc_copy.delete_pages(&del_pages);
+        let path = format!("{}{}{}", OUTPUTDIR, "/", name);
+        println!("Creazione della busta paga numero {} di {}:", n, name);
+        doc_copy.save(path).unwrap();
     }
 }

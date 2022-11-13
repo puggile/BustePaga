@@ -36,8 +36,14 @@ fn main() {
             break;
         }
 
-        println!("Valore: {input_value}");
-        read_file();
+        let mut dipendenti = Vec::new();
+        read_file(&mut dipendenti);
+
+        println!("Presenti: {} dipendenti", dipendenti.len());
+        
+        for value in &dipendenti {
+            println!("{}", value);
+        }
     }
 }
 
@@ -47,8 +53,9 @@ fn print_menu() {
     println!("Inserici il valore desiderato e premi INVIO");
 }
 
-fn read_file() {
-    println!("{}", std::env::current_dir().unwrap().display());
+fn read_file(dip: &mut Vec<String>) {
+    //debug: 
+    //println!("{}", std::env::current_dir().unwrap().display());
     let file_result = File::open(FILENAME);
 
     let greeting_file = match file_result {
@@ -59,7 +66,11 @@ fn read_file() {
     let reader = BufReader::new(greeting_file);
     for line in reader.lines() {
         match line {
-            Ok(s) =>         println!("{}", s),
+            Ok(s) => {
+                //debug: 
+                //println!("{}", s);
+                dip.push(s);
+            }
             Err(_) => println!("Errore linea")
         }
     }
